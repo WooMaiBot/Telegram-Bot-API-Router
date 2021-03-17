@@ -1,0 +1,29 @@
+{
+    "name": "wmlabs/telegram-bot-api-router",
+    "description": "Telegram Bot API Router",
+    "type": "library",
+    "version": "1.0.0",
+    "license": "proprietary",
+    "authors": [
+        {
+            "name": "WooMai",
+            "email": "woomai@wmlabs.net"
+        }
+    ],
+    "repositories": [
+        {
+            "type": "path",
+            "url": "./api-model"
+        }
+    ],
+    "require": {
+        "php": "^8.0",
+        "psr/http-message": "^1.0",
+        "wmlabs/telegram-bot-api-model": "^1.0.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "WooMaiLabs\\TelegramBotAPI\\Router\\": "src/"
+        }
+    }
+}

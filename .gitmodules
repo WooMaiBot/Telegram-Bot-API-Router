@@ -1,0 +1,3 @@
+[submodule "api-model"]
+	path = api-model
+	url = https://github.com/WooMaiBot/Telegram-Bot-API-Model
