@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6551ba1072cd8c2415c88a74d73f6a6c",
+    "content-hash": "efe61cbb411f3332cc4ef9a9b017cf52",
     "packages": [
         {
             "name": "psr/http-message",
@@ -67,11 +67,11 @@
         },
         {
             "name": "wmlabs/telegram-bot-api-model",
-            "version": "1.0.0",
+            "version": "dev-master",
             "dist": {
                 "type": "path",
                 "url": "./api-model",
-                "reference": "40c7dcbfedac4ebc3a8a48f51327c1ac82600ca5"
+                "reference": "b02bcd2eee73af28a687ebf5cdbfad8aa2e4e6c5"
             },
             "type": "library",
             "autoload": {
@@ -91,7 +91,9 @@
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "wmlabs/telegram-bot-api-model": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
