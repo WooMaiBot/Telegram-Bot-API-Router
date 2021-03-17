@@ -2,7 +2,6 @@
     "name": "wmlabs/telegram-bot-api-router",
     "description": "Telegram Bot API Router",
     "type": "library",
-    "version": "1.0.0",
     "license": "proprietary",
     "authors": [
         {
