@@ -16,9 +16,9 @@ class Router
     protected $command_routes = [];
     protected $callback_routes = [];
     protected $text_routes = [];
-    protected $text_default_route = null;
+    protected $text_default_routes = [];
     protected $inline_routes = [];
-    protected $inline_default_route = null;
+    protected $inline_default_routes = [];
     protected $global_middlewares = [];
 
     /**
@@ -77,7 +77,7 @@ class Router
         $route = new StandardRoute($callback, $middlewares);
 
         if (empty($regex)) {
-            $this->text_default_route = $route;
+            $this->text_default_routes[] = $route;
         } else {
             $this->text_routes[] = [$regex, $route];
         }
@@ -96,7 +96,7 @@ class Router
         $route = new StandardRoute($callback, $middlewares);
 
         if (empty($regex)) {
-            $this->inline_default_route = $route;
+            $this->inline_default_routes[] = $route;
         } else {
             $this->inline_routes[] = [$regex, $route];
         }
@@ -155,11 +155,13 @@ class Router
             }
 
             // text message default
-            if ($this->text_default_route) {
+            foreach ($this->text_default_routes as $route) {
                 /** @var StandardRoute $route */
-                $route = $this->text_default_route;
                 $route->prependMiddleware(...$this->global_middlewares);
-                return $route->call($update, [$text, []]);
+                $rsp = $route->call($update, [$text, []]);
+                if (!$rsp->isEmpty()) {
+                    return $rsp;
+                }
             }
 
             return new WebhookResponse();
@@ -201,11 +203,13 @@ class Router
             }
 
             // inline default
-            if ($this->inline_default_route) {
+            foreach ($this->inline_default_routes as $route) {
                 /** @var StandardRoute $route */
-                $route = $this->inline_default_route;
                 $route->prependMiddleware(...$this->global_middlewares);
-                return $route->call($update, [$update->inline_query->query, []]);
+                $rsp = $route->call($update, [$update->inline_query->query, []]);
+                if (!$rsp->isEmpty()) {
+                    return $rsp;
+                }
             }
 
             return new WebhookResponse();
