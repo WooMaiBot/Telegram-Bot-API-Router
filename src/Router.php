@@ -146,11 +146,11 @@ class Router
             // text message regex
             $text = $this->getMessageText($update->message);
             foreach ($this->text_routes as $text_route) {
-                if (preg_match($text_route[0], $text)) {
+                if (preg_match($text_route[0], $text, $matches)) {
                     /** @var StandardRoute $route */
                     $route = $text_route[1];
                     $route->prependMiddleware(...$this->global_middlewares);
-                    return $route->call($update, [$text]);
+                    return $route->call($update, [$text, $matches]);
                 }
             }
 
@@ -159,7 +159,7 @@ class Router
                 /** @var StandardRoute $route */
                 $route = $this->text_default_route;
                 $route->prependMiddleware(...$this->global_middlewares);
-                return $route->call($update, [$text]);
+                return $route->call($update, [$text, []]);
             }
 
             return new WebhookResponse();
@@ -192,11 +192,11 @@ class Router
 
             // inline regex
             foreach ($this->inline_routes as $inline_route) {
-                if (preg_match($inline_route[0], $update->inline_query->query)) {
+                if (preg_match($inline_route[0], $update->inline_query->query, $matches)) {
                     /** @var StandardRoute $route */
                     $route = $inline_route[1];
                     $route->prependMiddleware(...$this->global_middlewares);
-                    return $route->call($update, [$update->inline_query->query]);
+                    return $route->call($update, [$update->inline_query->query, $matches]);
                 }
             }
 
@@ -205,7 +205,7 @@ class Router
                 /** @var StandardRoute $route */
                 $route = $this->inline_default_route;
                 $route->prependMiddleware(...$this->global_middlewares);
-                return $route->call($update, [$update->inline_query->query]);
+                return $route->call($update, [$update->inline_query->query, []]);
             }
 
             return new WebhookResponse();
