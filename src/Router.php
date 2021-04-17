@@ -26,7 +26,8 @@ class Router
      * @param int $bot_user_id
      * @param string $bot_username
      */
-    #[Pure] public function __construct(protected int $bot_user_id, string $bot_username)
+    #[Pure]
+    public function __construct(protected int $bot_user_id, string $bot_username)
     {
         $this->bot_username = ltrim($bot_username, '@');
     }
@@ -65,12 +66,12 @@ class Router
     }
 
     /**
-     * @param string $regex Pass empty string if this is a default route.
+     * @param string|null $regex Pass empty string if this is a default route.
      * @param callable $callback
      * @param mixed ...$middlewares
      * @throws Exception
      */
-    public function text(string $regex, callable $callback, ...$middlewares)
+    public function text(?string $regex, callable $callback, ...$middlewares)
     {
         $this->verifyMiddlewares($middlewares);
 
@@ -84,12 +85,12 @@ class Router
     }
 
     /**
-     * @param string $regex Pass empty string if this is a default route.
+     * @param string|null $regex Pass empty string if this is a default route.
      * @param callable $callback
      * @param mixed ...$middlewares
      * @throws Exception
      */
-    public function inline(string $regex, callable $callback, ...$middlewares)
+    public function inline(?string $regex, callable $callback, ...$middlewares)
     {
         $this->verifyMiddlewares($middlewares);
 
@@ -254,6 +255,7 @@ class Router
         }
     }
 
+    #[Pure]
     protected function getCommandRegex(Command $command): string
     {
         $prefix = preg_quote($command->getPrefix() . $command->getCommand(), '/');
