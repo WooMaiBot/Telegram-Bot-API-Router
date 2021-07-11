@@ -4,10 +4,12 @@
 namespace WooMaiLabs\TelegramBotAPI\Router;
 
 
+use JetBrains\PhpStorm\Pure;
 use WooMaiLabs\TelegramBotAPI\Models\CallbackQuery;
 
 class CallbackAnswer extends WebhookResponse
 {
+    #[Pure]
     public function __construct(
         CallbackQuery $query,
         ?string $text = null,

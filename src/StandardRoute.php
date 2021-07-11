@@ -25,36 +25,9 @@ class StandardRoute
         array_unshift($this->middlewares, ...$middlewares);
     }
 
-    protected function handleMiddleware(Update $update, array $params): Update|WebhookResponse
-    {
-        foreach ($this->middlewares as $middleware) {
-            $tmp = $middleware($update, $params);
-
-            if ($tmp instanceof Update) {  // double check
-                $update = $tmp;
-            } else if ($tmp instanceof WebhookResponse) {
-                return $tmp;
-            }
-        }
-
-        return $update;
-    }
-
     public function call(Update $update, array $params = []): WebhookResponse
     {
-        $result = $this->handleMiddleware($update, $params);
-        if ($result instanceof WebhookResponse) {
-            return $result;
-        } else if ($result instanceof Update) {
-            $update = $result;
-        }
-
-        $response = ($this->callback)($update, $params);
-        if (!$response instanceof WebhookResponse) {
-            $response = new WebhookResponse();
-        }
-
-        return $response;
+        return RouteChain::run($update, $this->callback, $this->middlewares, $params);
     }
 
     public function __invoke(Update $update): WebhookResponse
