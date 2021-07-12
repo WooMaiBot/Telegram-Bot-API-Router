@@ -5,10 +5,12 @@ namespace WooMaiLabs\TelegramBotAPI\Router;
 
 
 use WooMaiLabs\TelegramBotAPI\Models\Update;
+use WooMaiLabs\TelegramBotAPI\Router\Utils\CallableIdentifier;
 
 class StandardRoute
 {
     protected $callback;
+    protected $route_dest;
 
     /**
      * StandardRoute constructor.
@@ -18,6 +20,7 @@ class StandardRoute
     public function __construct(callable $callback, protected array $middlewares)
     {
         $this->callback = $callback;
+        $this->route_dest = CallableIdentifier::get($callback);
     }
 
     public function prependMiddleware(...$middlewares)
@@ -27,6 +30,7 @@ class StandardRoute
 
     public function call(Update $update, array $params = []): WebhookResponse
     {
+        $update->withAttribute('route_destination', $this->route_dest);
         return RouteChain::run($update, $this->callback, $this->middlewares, $params);
     }
 
