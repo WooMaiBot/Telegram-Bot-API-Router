@@ -19,7 +19,11 @@ class RouteChain
     {
         $first_middleware = array_shift($middlewares);
         $next = new self($handler, $middlewares, $params);
-        return $first_middleware($update, $params, $next);
+        if (is_callable($first_middleware)) {
+            return $first_middleware($update, $params, $next);
+        } else {
+            return $next($update);
+        }
     }
 
     /**
@@ -35,7 +39,7 @@ class RouteChain
     public function __invoke(Update $update): WebhookResponse
     {
         $next = array_shift($this->middleware_chain);
-        if ($next) {
+        if (is_callable($next)) {
             return $next($update, $this->params, $this);
         }
 
