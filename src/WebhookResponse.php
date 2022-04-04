@@ -25,6 +25,16 @@ class WebhookResponse
         return $this->data;
     }
 
+    public function setMethod(string $method): void
+    {
+        $this->method = $method;
+    }
+
+    public function setData(array $data): void
+    {
+        $this->data = $data;
+    }
+
     public function toArray(): array
     {
         if (!$this->method) {
