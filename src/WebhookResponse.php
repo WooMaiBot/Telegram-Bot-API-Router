@@ -15,6 +15,16 @@ class WebhookResponse
         return empty($this->method);
     }
 
+    public function getMethod(): ?string
+    {
+        return $this->method;
+    }
+
+    public function getData(): array
+    {
+        return $this->data;
+    }
+
     public function toArray(): array
     {
         if (!$this->method) {
