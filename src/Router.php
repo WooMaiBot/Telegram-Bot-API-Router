@@ -266,8 +266,7 @@ class Router
         }
 
         if (empty($subcmds)) {
-            $subcmd = '';
-            $delimiter_regex = '\s';
+            return "/^$prefix(@$this->bot_username|)($|\s)/i";
         } else {
             $delimiter_raw = $command->getDelimiter();
             $delimiter = preg_quote($delimiter_raw, '/');
@@ -277,9 +276,9 @@ class Router
                 $delimiter_regex = "[$delimiter]";
             }
             $subcmd = implode("$delimiter_regex+", $subcmds);
-        }
 
-        return "/^$prefix(@$this->bot_username|)($|\s+$subcmd($|$delimiter_regex?))/i";
+            return "/^$prefix(@$this->bot_username|)\s+$subcmd($|$delimiter_regex?)/i";
+        }
     }
 
     protected function parseCommandParams(Command $command, Update $update): array
