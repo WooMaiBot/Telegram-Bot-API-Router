@@ -279,7 +279,7 @@ class Router
             $subcmd = implode("$delimiter_regex+", $subcmds);
         }
 
-        return "/^$prefix(@$this->bot_username|)($|\s+$subcmd($|$delimiter_regex))/i";
+        return "/^$prefix(@$this->bot_username|)($|\s+$subcmd($|$delimiter_regex?))/i";
     }
 
     protected function parseCommandParams(Command $command, Update $update): array
