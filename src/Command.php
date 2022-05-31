@@ -16,12 +16,13 @@ class Command implements \Stringable
      * @param string $command
      * @param string $prefix
      * @param array $subcommands
-     * @throws Exception
+     * @param string $delimiter regex will be [$delimiter]+ (multiple characters) or $delimiter+ (single character)
+     * @throws \Exception
      */
-    public function __construct(string $command, protected string $prefix = '/', protected array $subcommands = [])
+    public function __construct(string $command, protected string $prefix = '/', protected array $subcommands = [], protected string $delimiter = ' ')
     {
         $command = ltrim($command, '/');
-        if (!preg_match('/[a-z0-9_]/i', $command)) {
+        if (!preg_match('/\w/', $command)) {
             throw new Exception('Invalid command');
         }
 
@@ -43,12 +44,19 @@ class Command implements \Stringable
         return $this->subcommands;
     }
 
-    #[Pure] public function toString(): string
+    public function getDelimiter(): string
+    {
+        return $this->delimiter;
+    }
+
+    #[Pure]
+    public function toString(): string
     {
         return rtrim($this->prefix . $this->command . ' ' . implode(' ', $this->subcommands));
     }
 
-    #[Pure] public function __toString(): string
+    #[Pure]
+    public function __toString(): string
     {
         return $this->toString();
     }

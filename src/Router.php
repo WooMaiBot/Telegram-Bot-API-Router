@@ -32,7 +32,7 @@ class Router
         $this->bot_username = ltrim($bot_username, '@');
     }
 
-    public function command(array|Command $command, callable $callback, ...$middlewares)
+    public function command(array|Command $command, callable $callback, ...$middlewares): void
     {
         $this->verifyMiddlewares($middlewares);
 
@@ -54,7 +54,7 @@ class Router
         }
     }
 
-    public function callback(Callback $callback_identifier, callable $callback, ...$middlewares)
+    public function callback(Callback|string $callback_identifier, callable $callback, ...$middlewares): void
     {
         $this->verifyMiddlewares($middlewares);
 
@@ -71,7 +71,7 @@ class Router
      * @param mixed ...$middlewares
      * @throws Exception
      */
-    public function text(?string $regex, callable $callback, ...$middlewares)
+    public function text(?string $regex, callable $callback, ...$middlewares): void
     {
         $this->verifyMiddlewares($middlewares);
 
@@ -90,7 +90,7 @@ class Router
      * @param mixed ...$middlewares
      * @throws Exception
      */
-    public function inline(?string $regex, callable $callback, ...$middlewares)
+    public function inline(?string $regex, callable $callback, ...$middlewares): void
     {
         $this->verifyMiddlewares($middlewares);
 
@@ -103,7 +103,7 @@ class Router
         }
     }
 
-    public function addGlobalMiddlewares(...$middlewares)
+    public function addGlobalMiddlewares(...$middlewares): void
     {
         $this->verifyMiddlewares($middlewares);
 
@@ -221,7 +221,7 @@ class Router
         return new WebhookResponse();
     }
 
-    protected function verifyMiddlewares(array $middlewares)
+    protected function verifyMiddlewares(array $middlewares): void
     {
         foreach ($middlewares as $i => $middleware) {
             if (!$middleware instanceof MiddlewareInterface) {
@@ -268,7 +268,13 @@ class Router
         if (empty($subcmds)) {
             $subcmd = '';
         } else {
-            $subcmd = '\s+' . implode('\s+', $subcmds);
+            $delimiter_raw = $command->getDelimiter();
+            $delimiter = preg_quote($delimiter_raw, '/');
+            if (mb_strlen($delimiter_raw) === 1) {
+                $subcmd = "$delimiter+" . implode("$delimiter+", $subcmds);
+            } else {
+                $subcmd = "[$delimiter]+" . implode("[$delimiter]+", $subcmds);
+            }
         }
 
         return "/^$prefix(@$this->bot_username|)$subcmd($|\s)/i";
@@ -281,12 +287,21 @@ class Router
             return [];
         }
 
-        $param_string = trim(preg_replace($this->getCommandRegex($command), '', $msgtext));
+        $delimiter_raw = $command->getDelimiter();
+
+        $param_string = trim(preg_replace($this->getCommandRegex($command), '', $msgtext), " \t\n\r\0\x0B$delimiter_raw");
         if (empty($param_string)) {
             return [];
         }
 
-        return preg_split('/\s+/', $param_string);
+        $delimiter = preg_quote($delimiter_raw, '/');
+        if (mb_strlen($delimiter_raw) === 1) {
+            $regex = "/$delimiter+/";
+        } else {
+            $regex = "/[$delimiter]+/";
+        }
+
+        return preg_split($regex, $param_string);
     }
 
     protected function matchCallback(Callback $callback, CallbackQuery $query): bool
