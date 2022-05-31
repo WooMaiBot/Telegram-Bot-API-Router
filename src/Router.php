@@ -267,17 +267,19 @@ class Router
 
         if (empty($subcmds)) {
             $subcmd = '';
+            $delimiter_regex = '\s';
         } else {
             $delimiter_raw = $command->getDelimiter();
             $delimiter = preg_quote($delimiter_raw, '/');
             if (mb_strlen($delimiter_raw) === 1) {
-                $subcmd = "$delimiter+" . implode("$delimiter+", $subcmds);
+                $delimiter_regex = $delimiter;
             } else {
-                $subcmd = "[$delimiter]+" . implode("[$delimiter]+", $subcmds);
+                $delimiter_regex = "[$delimiter]";
             }
+            $subcmd = implode("$delimiter_regex+", $subcmds);
         }
 
-        return "/^$prefix(@$this->bot_username|)$subcmd($|\s)/i";
+        return "/^$prefix(@$this->bot_username|)\s+$subcmd($|$delimiter_regex)/i";
     }
 
     protected function parseCommandParams(Command $command, Update $update): array

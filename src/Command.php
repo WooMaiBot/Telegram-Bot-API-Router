@@ -16,7 +16,7 @@ class Command implements \Stringable
      * @param string $command
      * @param string $prefix
      * @param array $subcommands
-     * @param string $delimiter regex will be [$delimiter]+ (multiple characters) or $delimiter+ (single character)
+     * @param string $delimiter only for subcommand, regex will be [$delimiter]+ (multiple characters) or $delimiter+ (single character)
      * @throws \Exception
      */
     public function __construct(string $command, protected string $prefix = '/', protected array $subcommands = [], protected string $delimiter = ' ')
