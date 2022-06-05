@@ -9,6 +9,13 @@ use WooMaiLabs\TelegramBotAPI\Router\Utils\CallableIdentifier;
 
 class StandardRoute
 {
+    public static function dummy(): StandardRoute
+    {
+        return new static(function () {
+            return new WebhookResponse();
+        }, []);
+    }
+
     protected $callback;
     protected $route_dest;
 

@@ -17,8 +17,10 @@ class CallableIdentifier
                 $class_name = $callable[0];
             }
             return "$class_name::$callable[1]";
-        } else {
+        } else if (is_object($callable)) {
             return get_class($callable);
+        } else {
+            return "OTHER_CALLABLE";
         }
     }
 }

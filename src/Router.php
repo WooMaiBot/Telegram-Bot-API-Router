@@ -13,13 +13,14 @@ use WooMaiLabs\TelegramBotAPI\Models\Update;
 
 class Router
 {
-    protected $command_routes = [];
-    protected $callback_routes = [];
-    protected $text_routes = [];
-    protected $text_default_routes = [];
-    protected $inline_routes = [];
-    protected $inline_default_routes = [];
-    protected $global_middlewares = [];
+    protected array $command_routes = [];
+    protected array $callback_routes = [];
+    protected array $text_routes = [];
+    protected array $text_default_routes = [];
+    protected array $inline_routes = [];
+    protected array $inline_default_routes = [];
+    protected array $global_middlewares = [];
+    protected array $catch_all_middlewares = [];
 
     /**
      * Router constructor.
@@ -112,6 +113,15 @@ class Router
         }
     }
 
+    public function addCatchAllMiddlewares(...$middlewares): void
+    {
+        $this->verifyMiddlewares($middlewares);
+
+        foreach ($middlewares as $middleware) {
+            $this->catch_all_middlewares[] = $middleware;
+        }
+    }
+
     public function route(RequestInterface $request = null, object $update_object = null): WebhookResponse
     {
         if ($request) {
@@ -123,8 +133,7 @@ class Router
 
         $update = new Update($update_object);
 
-        // message
-        if (isset($update->message)) {
+        if (isset($update->message)) {  // message
             $update->withAttribute('issued_user', $update->message->from);
 
             // check command
@@ -134,7 +143,7 @@ class Router
                 if ($this->matchCommand($command, $update)) {
                     /** @var StandardRoute $route */
                     $route = $command_route[1];
-                    $route->prependMiddleware(...$this->global_middlewares);
+                    $route->prependMiddleware(...$this->catch_all_middlewares, ...$this->global_middlewares);
                     return $route->call(
                         $update->withAttribute('route_type', 'command')->withAttribute('routed_command', $command),
                         $this->parseCommandParams($command_route[0], $update)
@@ -150,7 +159,7 @@ class Router
                 if (preg_match($text_route[0], $text, $matches)) {
                     /** @var StandardRoute $route */
                     $route = $text_route[1];
-                    $route->prependMiddleware(...$this->global_middlewares);
+                    $route->prependMiddleware(...$this->catch_all_middlewares, ...$this->global_middlewares);
                     return $route->call($update, [$text, $matches]);
                 }
             }
@@ -158,18 +167,13 @@ class Router
             // text message default
             foreach ($this->text_default_routes as $route) {
                 /** @var StandardRoute $route */
-                $route->prependMiddleware(...$this->global_middlewares);
+                $route->prependMiddleware(...$this->catch_all_middlewares, ...$this->global_middlewares);
                 $rsp = $route->call($update, [$text, []]);
                 if (!$rsp->isEmpty()) {
                     return $rsp;
                 }
             }
-
-            return new WebhookResponse();
-        }
-
-        // callback
-        if (isset($update->callback_query)) {
+        } else if (isset($update->callback_query)) {  // callback
             $update->withAttribute('route_type', 'callback')
                 ->withAttribute('issued_user', $update->callback_query->from);
 
@@ -177,19 +181,14 @@ class Router
                 if ($this->matchCallback($callback_route[0], $update->callback_query)) {
                     /** @var StandardRoute $route */
                     $route = $callback_route[1];
-                    $route->prependMiddleware(...$this->global_middlewares);
+                    $route->prependMiddleware(...$this->catch_all_middlewares, ...$this->global_middlewares);
                     return $route->call(
                         $update->withAttribute('routed_identifier', $callback_route[0]),
                         $this->parseCallbackDataParams($update->callback_query)
                     );
                 }
             }
-
-            return new WebhookResponse();
-        }
-
-        // inline
-        if (isset($update->inline_query)) {
+        } else if (isset($update->inline_query)) {  // inline
             $update->withAttribute('route_type', 'inline')
                 ->withAttribute('issued_user', $update->inline_query->from);
 
@@ -198,7 +197,7 @@ class Router
                 if (preg_match($inline_route[0], $update->inline_query->query, $matches)) {
                     /** @var StandardRoute $route */
                     $route = $inline_route[1];
-                    $route->prependMiddleware(...$this->global_middlewares);
+                    $route->prependMiddleware(...$this->catch_all_middlewares, ...$this->global_middlewares);
                     return $route->call($update, [$update->inline_query->query, $matches]);
                 }
             }
@@ -206,19 +205,20 @@ class Router
             // inline default
             foreach ($this->inline_default_routes as $route) {
                 /** @var StandardRoute $route */
-                $route->prependMiddleware(...$this->global_middlewares);
+                $route->prependMiddleware(...$this->catch_all_middlewares, ...$this->global_middlewares);
                 $rsp = $route->call($update, [$update->inline_query->query, []]);
                 if (!$rsp->isEmpty()) {
                     return $rsp;
                 }
             }
-
-            return new WebhookResponse();
         }
 
         // other update types here ...
 
-        return new WebhookResponse();
+        $catchAll = StandardRoute::dummy();
+        $catchAll->prependMiddleware(...$this->catch_all_middlewares);
+        $rsp = $catchAll->call($update, [$update->inline_query->query, []]);
+        return $rsp;
     }
 
     protected function verifyMiddlewares(array $middlewares): void
