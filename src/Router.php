@@ -217,7 +217,7 @@ class Router
 
         $catchAll = StandardRoute::dummy();
         $catchAll->prependMiddleware(...$this->catch_all_middlewares);
-        $rsp = $catchAll->call($update, [$update->inline_query->query, []]);
+        $rsp = $catchAll->call($update, []);
         return $rsp;
     }
 
