@@ -14,12 +14,19 @@ class Command implements \Stringable
     /**
      * Command constructor.
      * @param string $command
+     * @param array $allowed_chat_types
      * @param string $prefix
      * @param array $subcommands
      * @param string $delimiter only for subcommand, regex will be [$delimiter]+ (multiple characters) or $delimiter+ (single character)
      * @throws \Exception
      */
-    public function __construct(string $command, protected string $prefix = '/', protected array $subcommands = [], protected string $delimiter = ' ')
+    public function __construct(
+        string           $command,
+        protected array  $allowed_chat_types = [],
+        protected string $prefix = '/',
+        protected array  $subcommands = [],
+        protected string $delimiter = ' ',
+    )
     {
         $command = ltrim($command, '/');
         if (!preg_match('/\w/', $command)) {
@@ -47,6 +54,15 @@ class Command implements \Stringable
     public function getDelimiter(): string
     {
         return $this->delimiter;
+    }
+
+    public function getAllowedChatTypes(): array
+    {
+        if (empty($this->allowed_chat_types)) {
+            return ['private', 'group', 'supergroup', /*'channel'*/];
+        }
+
+        return $this->allowed_chat_types;
     }
 
     #[Pure]

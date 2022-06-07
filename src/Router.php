@@ -232,6 +232,10 @@ class Router
 
     protected function matchCommand(Command $command, Update $update): bool
     {
+        if (!in_array($update->chat->type, $command->getAllowedChatTypes())) {
+            return false;
+        }
+
         $msgtext = $this->getMessageText($update->message);
         if (!$msgtext) {
             return false;
