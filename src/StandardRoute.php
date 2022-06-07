@@ -30,7 +30,7 @@ class StandardRoute
         $this->route_dest = CallableIdentifier::get($callback);
     }
 
-    public function prependMiddleware(...$middlewares)
+    public function prependMiddleware(...$middlewares): void
     {
         array_unshift($this->middlewares, ...$middlewares);
     }

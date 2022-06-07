@@ -18,7 +18,7 @@ class CallableIdentifier
             }
             return "$class_name::$callable[1]";
         } else if (is_object($callable)) {
-            return get_class($callable);
+            return get_class((object)$callable);
         } else {
             return "OTHER_CALLABLE";
         }

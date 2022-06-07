@@ -6,8 +6,9 @@ namespace WooMaiLabs\TelegramBotAPI\Router;
 
 use Exception;
 use JetBrains\PhpStorm\Pure;
+use Stringable;
 
-class Command implements \Stringable
+class Command implements Stringable
 {
     protected $command;
 

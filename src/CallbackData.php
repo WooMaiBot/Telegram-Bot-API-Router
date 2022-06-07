@@ -5,8 +5,9 @@ namespace WooMaiLabs\TelegramBotAPI\Router;
 
 
 use JetBrains\PhpStorm\Pure;
+use Stringable;
 
-class CallbackData implements \Stringable
+class CallbackData implements Stringable
 {
     public function __construct(protected string $identifier, protected array $data)
     {

@@ -217,8 +217,7 @@ class Router
 
         $catchAll = StandardRoute::dummy();
         $catchAll->prependMiddleware(...$this->catch_all_middlewares);
-        $rsp = $catchAll->call($update, []);
-        return $rsp;
+        return $catchAll->call($update, []);
     }
 
     protected function verifyMiddlewares(array $middlewares): void
@@ -250,13 +249,7 @@ class Router
 
     protected function getMessageText(Message $message): ?string
     {
-        if (isset($message->text)) {
-            return $message->text;
-        } else if (isset($message->caption)) {
-            return $message->caption;
-        } else {
-            return null;
-        }
+        return $message->text ?? $message->caption ?? null;
     }
 
     #[Pure]
