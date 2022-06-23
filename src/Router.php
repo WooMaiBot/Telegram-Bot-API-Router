@@ -19,8 +19,10 @@ class Router
     protected array $text_default_routes = [];
     protected array $inline_routes = [];
     protected array $inline_default_routes = [];
-    protected array $global_middlewares = [];
-    protected array $catch_all_middlewares = [];
+    protected array $global_middlewares_prepend = [];
+    protected array $global_middlewares_append = [];
+    protected array $catch_all_middlewares_prepend = [];
+    protected array $catch_all_middlewares_append = [];
 
     /**
      * Router constructor.
@@ -104,21 +106,29 @@ class Router
         }
     }
 
-    public function addGlobalMiddlewares(...$middlewares): void
+    const PREPEND = 1;
+    const APPEND = 2;
+
+    public function addGlobalMiddlewares(int $order, ...$middlewares): void
     {
         $this->verifyMiddlewares($middlewares);
 
-        foreach ($middlewares as $middleware) {
-            $this->global_middlewares[] = $middleware;
+        if ($order === self::PREPEND) {
+            $this->global_middlewares_prepend = array_merge($this->global_middlewares_prepend, $middlewares);
+        } else {
+            $this->global_middlewares_append = array_merge($this->global_middlewares_append, $middlewares);
         }
+
     }
 
-    public function addCatchAllMiddlewares(...$middlewares): void
+    public function addCatchAllMiddlewares(int $order, ...$middlewares): void
     {
         $this->verifyMiddlewares($middlewares);
 
-        foreach ($middlewares as $middleware) {
-            $this->catch_all_middlewares[] = $middleware;
+        if ($order === self::PREPEND) {
+            $this->catch_all_middlewares_prepend = array_merge($this->catch_all_middlewares_prepend, $middlewares);
+        } else {
+            $this->catch_all_middlewares_append = array_merge($this->catch_all_middlewares_append, $middlewares);
         }
     }
 
@@ -143,7 +153,8 @@ class Router
                 if ($this->matchCommand($command, $update)) {
                     /** @var StandardRoute $route */
                     $route = $command_route[1];
-                    $route->prependMiddleware(...$this->catch_all_middlewares, ...$this->global_middlewares);
+                    $route->prependMiddleware(...$this->catch_all_middlewares_prepend, ...$this->global_middlewares_prepend);
+                    $route->appendMiddleware(...$this->catch_all_middlewares_append, ...$this->global_middlewares_append);
                     return $route->call(
                         $update->withAttribute('route_type', 'command')->withAttribute('routed_command', $command),
                         $this->parseCommandParams($command_route[0], $update)
@@ -159,7 +170,8 @@ class Router
                 if (preg_match($text_route[0], $text, $matches)) {
                     /** @var StandardRoute $route */
                     $route = $text_route[1];
-                    $route->prependMiddleware(...$this->catch_all_middlewares, ...$this->global_middlewares);
+                    $route->prependMiddleware(...$this->catch_all_middlewares_prepend, ...$this->global_middlewares_prepend);
+                    $route->appendMiddleware(...$this->catch_all_middlewares_append, ...$this->global_middlewares_append);
                     return $route->call($update, [$text, $matches]);
                 }
             }
@@ -167,7 +179,8 @@ class Router
             // text message default
             foreach ($this->text_default_routes as $route) {
                 /** @var StandardRoute $route */
-                $route->prependMiddleware(...$this->catch_all_middlewares, ...$this->global_middlewares);
+                $route->prependMiddleware(...$this->catch_all_middlewares_prepend, ...$this->global_middlewares_prepend);
+                $route->appendMiddleware(...$this->catch_all_middlewares_append, ...$this->global_middlewares_append);
                 $rsp = $route->call($update, [$text, []]);
                 if (!$rsp->isEmpty()) {
                     return $rsp;
@@ -181,7 +194,8 @@ class Router
                 if ($this->matchCallback($callback_route[0], $update->callback_query)) {
                     /** @var StandardRoute $route */
                     $route = $callback_route[1];
-                    $route->prependMiddleware(...$this->catch_all_middlewares, ...$this->global_middlewares);
+                    $route->prependMiddleware(...$this->catch_all_middlewares_prepend, ...$this->global_middlewares_prepend);
+                    $route->appendMiddleware(...$this->catch_all_middlewares_append, ...$this->global_middlewares_append);
                     return $route->call(
                         $update->withAttribute('routed_identifier', $callback_route[0]),
                         $this->parseCallbackDataParams($update->callback_query)
@@ -197,7 +211,8 @@ class Router
                 if (preg_match($inline_route[0], $update->inline_query->query, $matches)) {
                     /** @var StandardRoute $route */
                     $route = $inline_route[1];
-                    $route->prependMiddleware(...$this->catch_all_middlewares, ...$this->global_middlewares);
+                    $route->prependMiddleware(...$this->catch_all_middlewares_prepend, ...$this->global_middlewares_prepend);
+                    $route->appendMiddleware(...$this->catch_all_middlewares_append, ...$this->global_middlewares_append);
                     return $route->call($update, [$update->inline_query->query, $matches]);
                 }
             }
@@ -205,7 +220,8 @@ class Router
             // inline default
             foreach ($this->inline_default_routes as $route) {
                 /** @var StandardRoute $route */
-                $route->prependMiddleware(...$this->catch_all_middlewares, ...$this->global_middlewares);
+                $route->prependMiddleware(...$this->catch_all_middlewares_prepend, ...$this->global_middlewares_prepend);
+                $route->appendMiddleware(...$this->catch_all_middlewares_append, ...$this->global_middlewares_append);
                 $rsp = $route->call($update, [$update->inline_query->query, []]);
                 if (!$rsp->isEmpty()) {
                     return $rsp;
@@ -216,7 +232,8 @@ class Router
         // other update types here ...
 
         $catchAll = StandardRoute::dummy();
-        $catchAll->prependMiddleware(...$this->catch_all_middlewares);
+        $catchAll->prependMiddleware(...$this->catch_all_middlewares_prepend);
+        $catchAll->appendMiddleware(...$this->catch_all_middlewares_append);
         return $catchAll->call($update, []);
     }
 

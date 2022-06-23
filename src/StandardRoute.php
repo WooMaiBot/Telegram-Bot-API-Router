@@ -35,6 +35,11 @@ class StandardRoute
         array_unshift($this->middlewares, ...$middlewares);
     }
 
+    public function appendMiddleware(...$middlewares): void
+    {
+        array_push($this->middlewares, ...$middlewares);
+    }
+
     public function call(Update $update, array $params = []): WebhookResponse
     {
         $update->withAttribute('route_destination', $this->route_dest);
