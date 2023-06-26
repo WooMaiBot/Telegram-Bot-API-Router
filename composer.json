@@ -2,17 +2,11 @@
     "name": "wmlabs/telegram-bot-api-router",
     "description": "Telegram Bot API Router",
     "type": "library",
-    "license": "proprietary",
+    "license": "The Unlicense",
     "authors": [
         {
             "name": "WooMai",
             "email": "woomai@wmlabs.net"
-        }
-    ],
-    "repositories": [
-        {
-            "type": "path",
-            "url": "./api-model"
         }
     ],
     "require": {
