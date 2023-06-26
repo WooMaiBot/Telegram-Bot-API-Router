@@ -7,3 +7,7 @@ Currently supports Message, CallbackQuery and InlineQuery.
 ## Usage
 
 Checkout [examples](examples).
+
+## License
+
+[The Unlicense](LICENSE)
